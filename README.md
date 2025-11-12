@@ -415,7 +415,7 @@ Special thanks to:
 - **Supported Languages:** 2 (EN, FR)
 - **Featured Attractions:** 20+
 - **API Integrations:** 5+
-- **Development Time:** 3+ weeks
+- **Development Time:** 1 day
 - **Contributors:** Growing!
 
 ---
