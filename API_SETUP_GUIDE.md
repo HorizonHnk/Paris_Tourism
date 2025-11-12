@@ -18,7 +18,7 @@ Your Paris Tourism website now includes **live weather** and **live currency con
    - Login to your account
    - Go to: https://home.openweathermap.org/api_keys
    - Your default API key is already generated!
-   - Copy the API key (looks like: `a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6`)
+   - Copy the API key (32-character alphanumeric string)
 
 ### Step 2: Add API Key to Your Website
 
@@ -39,14 +39,14 @@ window.weatherWidget = new WeatherWidget('YOUR_API_KEY_HERE');
 
 **Example**:
 ```javascript
-window.weatherWidget = new WeatherWidget('a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6');
+window.weatherWidget = new WeatherWidget('paste_your_actual_api_key_here');
 ```
 
 **Method 2: Environment Variable (Production)**
 
 Create a `.env` file:
 ```env
-OPENWEATHER_API_KEY=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+OPENWEATHER_API_KEY=paste_your_actual_api_key_here
 ```
 
 Update `weather-currency.js`:
