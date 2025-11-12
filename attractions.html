@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paris Attractions - Discover Iconic Landmarks</title>
+    <meta name="description" content="Explore Paris's most iconic attractions and landmarks. From the Eiffel Tower to the Louvre, discover what makes the City of Light magical.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    
+    <!-- ECharts for Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <!-- Leaflet for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        :root {
+            --paris-blue: #4A90E2;
+            --cream-white: #F8F6F0;
+            --charcoal-gray: #2C3E50;
+            --rose-gold: #E8B4B8;
+            --sage-green: #9CAF88;
+            --warm-gold: #D4AF37;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream-white) 0%, #f0f4f8 100%);
+            min-height: 100vh;
+        }
+        
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .font-script {
+            font-family: 'Dancing Script', cursive;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--paris-blue), var(--rose-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .attraction-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .attraction-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background: var(--paris-blue);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .nav-glass {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .lang-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .lang-btn.active {
+            background: var(--paris-blue);
+            color: white;
+        }
+        
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .modal {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 12px;
+        }
+        
+        .splide__slide img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 1rem;
+                max-height: calc(100vh - 2rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-40 nav-glass border-b border-white/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="index.html" class="font-display text-2xl font-bold text-gray-800">Paris<span class="gradient-text">Tourism</span></a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium" data-translate="home">Home</a>
+                    <a href="attractions.html" class="text-blue-600 font-medium" data-translate="attractions">Attractions</a>
+                    <a href="culture.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium" data-translate="culture">Culture</a>
+                    <a href="contact.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium" data-translate="contact">Contact</a>
+                    
+                    <!-- Language Switcher -->
+                    <div class="flex items-center space-x-2">
+                        <button class="lang-btn px-3 py-1 rounded-md text-sm font-medium active" data-lang="en">🇺🇸 EN</button>
+                        <button class="lang-btn px-3 py-1 rounded-md text-sm font-medium" data-lang="fr">🇫🇷 FR</button>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden py-4 border-t border-gray-200">
+                <div class="flex flex-col space-y-3">
+                    <a href="index.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium" data-translate="home">Home</a>
+                    <a href="attractions.html" class="text-blue-600 font-medium" data-translate="attractions">Attractions</a>
+                    <a href="culture.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium" data-translate="culture">Culture</a>
+                    <a href="contact.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium" data-translate="contact">Contact</a>
+                    
+                    <!-- Mobile Language Switcher -->
+                    <div class="flex items-center space-x-2 pt-2">
+                        <button class="lang-btn px-3 py-1 rounded-md text-sm font-medium active" data-lang="en">🇺🇸 EN</button>
+                        <button class="lang-btn px-3 py-1 rounded-md text-sm font-medium" data-lang="fr">🇫🇷 FR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="pt-24 pb-12 bg-gradient-to-br from-blue-50 to-rose-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="font-display text-4xl md:text-6xl font-bold text-gray-800 mb-4">
+                Paris <span class="gradient-text">Attractions</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Discover the iconic landmarks and hidden gems that make Paris the most captivating city in the world
+            </p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="py-8 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="filter-btn px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 active" data-filter="all">
+                    All Attractions
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 font-medium hover:bg-gray-50" data-filter="monuments">
+                    Monuments
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 font-medium hover:bg-gray-50" data-filter="museums">
+                    Museums
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 font-medium hover:bg-gray-50" data-filter="gardens">
+                    Gardens
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 font-medium hover:bg-gray-50" data-filter="churches">
+                    Churches
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Attractions Grid -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="attractions-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 stagger-children">
+                
+                <!-- Eiffel Tower -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="monuments" data-id="eiffel">
+                    <div class="relative h-48">
+                        <img src="./resources/eiffel-tower.jpg" alt="Eiffel Tower" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            6.3M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Monument
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2" data-translate="eiffelTower">Eiffel Tower</h3>
+                        <p class="text-gray-600 mb-4">
+                            Gustave Eiffel's iron masterpiece, built in 1889 for the World's Fair. Standing 324 meters tall, it offers breathtaking panoramic views of Paris from its three observation decks.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-blue-600 font-semibold text-lg">€26.10</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.8/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('eiffel')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('eiffel')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Louvre Museum -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="museums" data-id="louvre">
+                    <div class="relative h-48">
+                        <img src="./resources/louvre.jpg" alt="Louvre Museum" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            8.9M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Museum
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2" data-translate="louvre">Louvre Museum</h3>
+                        <p class="text-gray-600 mb-4">
+                            The world's largest art museum housing over 380,000 artifacts including the Mona Lisa, Venus de Milo, and countless masterpieces spanning 9,000 years of history.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-blue-600 font-semibold text-lg">€22</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.7/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('louvre')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('louvre')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notre Dame Cathedral -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="churches" data-id="notre-dame">
+                    <div class="relative h-48">
+                        <img src="./resources/notre-dame.jpg" alt="Notre Dame Cathedral" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            6M+ visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Church
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2" data-translate="notreDame">Notre Dame Cathedral</h3>
+                        <p class="text-gray-600 mb-4">
+                            A masterpiece of French Gothic architecture dating from 1163. Recently restored after the 2019 fire, this iconic cathedral continues to inspire visitors with its stunning beauty.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-green-600 font-semibold text-lg">Free</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.9/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('notre-dame')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('notre-dame')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arc de Triomphe -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="monuments" data-id="arc-triomphe">
+                    <div class="relative h-48">
+                        <img src="./resources/arc-triomphe.jpg" alt="Arc de Triomphe" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            1.7M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Monument
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2" data-translate="arcTriomphe">Arc de Triomphe</h3>
+                        <p class="text-gray-600 mb-4">
+                            Napoleon's triumphal arch commissioned in 1806 to honor those who fought for France. The panoramic terrace offers stunning views of the Champs-Élysées.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-blue-600 font-semibold text-lg">€16</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.6/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('arc-triomphe')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('arc-triomphe')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sacré-Cœur -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="churches" data-id="sacre-coeur">
+                    <div class="relative h-48">
+                        <img src="./resources/sacre-coeur.jpg" alt="Sacré-Cœur" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            11M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Church
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2" data-translate="sacreCoeur">Sacré-Cœur</h3>
+                        <p class="text-gray-600 mb-4">
+                            Stunning white basilica perched on Montmartre hill, completed in 1919. Famous for its Romano-Byzantine architecture and panoramic views of Paris.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-green-600 font-semibold text-lg">Free</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.8/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('sacre-coeur')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('sacre-coeur')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Palace of Versailles -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="gardens" data-id="versailles">
+                    <div class="relative h-48">
+                        <img src="./resources/versailles-palace.jpg" alt="Palace of Versailles" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            8M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Gardens
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2" data-translate="versailles">Palace of Versailles</h3>
+                        <p class="text-gray-600 mb-4">
+                            Opulent royal palace representing the absolute monarchy of the Ancien Régime. Famous for the Hall of Mirrors and magnificent French gardens designed by André Le Nôtre.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-blue-600 font-semibold text-lg">€20</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.7/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('versailles')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('versailles')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Luxembourg Gardens -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="gardens" data-id="luxembourg">
+                    <div class="relative h-48">
+                        <img src="https://kimi-web-img.moonshot.cn/img/cdn.britannica.com/5c5c5675f09a49b51c6b09742baa5f42196d7424.jpg" alt="Luxembourg Gardens" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            3.5M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Gardens
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Luxembourg Gardens</h3>
+                        <p class="text-gray-600 mb-4">
+                            Beautiful 25-hectare park created in 1612 by Marie de' Medici. Features the Luxembourg Palace, Medici Fountain, and perfectly manicured French and English gardens.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-green-600 font-semibold text-lg">Free</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.8/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('luxembourg')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('luxembourg')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Musée d'Orsay -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="museums" data-id="orsay">
+                    <div class="relative h-48">
+                        <img src="./resources/art-gallery.jpg" alt="Musée d'Orsay" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            4.95M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Museum
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Musée d'Orsay</h3>
+                        <p class="text-gray-600 mb-4">
+                            Housed in a former railway station, this museum features the world's finest collection of Impressionist and Post-Impressionist masterpieces by Monet, Renoir, Degas, and Van Gogh.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-blue-600 font-semibold text-lg">€16</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.7/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('orsay')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('orsay')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Centre Pompidou -->
+                <div class="attraction-card rounded-xl overflow-hidden shadow-lg fade-in-up" data-category="museums" data-id="pompidou">
+                    <div class="relative h-48">
+                        <img src="./resources/fashion.jpg" alt="Centre Pompidou" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+                            3.2M visitors
+                        </div>
+                        <div class="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Museum
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Centre Pompidou</h3>
+                        <p class="text-gray-600 mb-4">
+                            Europe's largest modern and contemporary art museum. Famous for its inside-out architecture and extensive collection of 20th and 21st-century art, including works by Picasso and Kandinsky.
+                        </p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-blue-600 font-semibold text-lg">€15</span>
+                            <div class="flex items-center text-yellow-500">
+                                ⭐⭐⭐⭐ <span class="text-gray-600 ml-1 text-sm">(4.5/5)</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="openModal('pompidou')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                Details
+                            </button>
+                            <button onclick="addToItinerary('pompidou')" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                ♡ Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Map Section -->
+    <section class="py-20 bg-gradient-to-br from-blue-50 to-rose-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in-up">
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                    Paris <span class="gradient-text">Attractions Map</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Explore the locations of Paris's most famous attractions
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-8 fade-in-up">
+                <div id="map"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visitor Statistics -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in-up">
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                    Visitor <span class="gradient-text">Statistics</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Understanding tourism trends in Paris
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="fade-in-up">
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-6 text-center">Top Attractions by Visitors</h3>
+                    <div id="attractions-chart" style="height: 400px;"></div>
+                </div>
+                
+                <div class="fade-in-up">
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-6 text-center">Best Times to Visit</h3>
+                    <div id="timing-chart" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for Attraction Details -->
+    <div id="attraction-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-4xl p-8">
+            <div class="flex justify-between items-start mb-6">
+                <h2 id="modal-title" class="font-display text-3xl font-bold text-gray-800"></h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <img id="modal-image" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4">
+                    <div id="modal-gallery" class="splide">
+                        <div class="splide__track">
+                            <ul class="splide__list" id="modal-gallery-list">
+                                <!-- Gallery images will be inserted here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div id="modal-content">
+                        <!-- Content will be inserted here -->
+                    </div>
+                    
+                    <div class="mt-6 space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span class="font-semibold">Admission:</span>
+                            <span id="modal-price" class="text-blue-600 font-bold"></span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span class="font-semibold">Rating:</span>
+                            <div id="modal-rating" class="text-yellow-500"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span class="font-semibold">Annual Visitors:</span>
+                            <span id="modal-visitors" class="text-blue-600 font-bold"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex space-x-4">
+                        <button onclick="bookTickets()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                            Book Tickets
+                        </button>
+                        <button onclick="addToItineraryFromModal()" class="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                            Add to Itinerary
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="font-display text-2xl font-bold mb-4">Paris<span class="text-blue-400">Tourism</span></h3>
+                    <p class="text-gray-300 mb-4">Your gateway to discovering the magic of Paris. Experience the City of Light like never before.</p>
+                    <div class="flex space-x-4">
+                        <a href="https://youtube.com/@HNK2005" class="text-gray-300 hover:text-white transition-colors">📺</a>
+                        <a href="https://twitter.com/HnkHorizon" class="text-gray-300 hover:text-white transition-colors">🐦</a>
+                        <a href="https://instagram.com/hhnk.3693" class="text-gray-300 hover:text-white transition-colors">📷</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-300 hover:text-white transition-colors" data-translate="home">Home</a></li>
+                        <li><a href="culture.html" class="text-gray-300 hover:text-white transition-colors" data-translate="culture">Culture</a></li>
+                        <li><a href="contact.html" class="text-gray-300 hover:text-white transition-colors" data-translate="contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Travel Guide</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Weather Info</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Transport</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact Info</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>📧 hhnk3693@gmail.com</li>
+                        <li>🌐 Paris, France</li>
+                        <li>🕐 24/7 Online Support</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-300" data-translate="copyright">© 2025 Paris Tourism. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript -->
+    <script src="main-clean.js"></script>
+    
+    <!-- Attractions Page Specific JavaScript -->
+    <script>
+        // Attraction data for modal and filtering
+        const attractionsData = {
+            eiffel: {
+                title: "Eiffel Tower",
+                image: "./resources/eiffel-tower.jpg",
+                price: "€26.10",
+                rating: "⭐⭐⭐⭐⭐ (4.8/5)",
+                visitors: "6.3M",
+                description: "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France. It is one of the most recognizable structures in the world and the most-visited paid monument. Built in 1889, it has become a global cultural icon of France and one of the most recognizable structures in the world.",
+                history: "Constructed from 1887 to 1889 as the entrance arch for the 1889 World's Fair, it was initially criticized by some of France's leading artists and intellectuals for its design, but it has become a global cultural icon of France and one of the most recognizable structures in the world.",
+                highlights: [
+                    "Three observation decks with panoramic views",
+                    "Restaurant 58 Tour Eiffel on the first floor",
+                    "Gustave Eiffel's office recreation on the top floor",
+                    "Spectacular light show every evening",
+                    "Glass floor sections for thrilling views"
+                ],
+                tips: [
+                    "Book tickets online in advance to avoid long queues",
+                    "Visit at sunset for the best views and photos",
+                    "The second floor offers the best photography opportunities",
+                    "Consider taking the stairs for a unique experience"
+                ]
+            },
+            louvre: {
+                title: "Louvre Museum",
+                image: "./resources/louvre.jpg",
+                price: "€22",
+                rating: "⭐⭐⭐⭐⭐ (4.7/5)",
+                visitors: "8.9M",
+                description: "The Louvre, or the Louvre Museum, is the world's largest art museum and a historic monument in Paris, France. A central landmark of the city, it is located on the Right Bank of the Seine.",
+                history: "Originally built as a fortress in the late 12th century, it was transformed into a royal palace in the 16th century. After the French Revolution, it became a public museum in 1793.",
+                highlights: [
+                    "Mona Lisa by Leonardo da Vinci",
+                    "Venus de Milo ancient Greek statue",
+                    "Winged Victory of Samothrace",
+                    "Egyptian antiquities collection",
+                    "Napoleon III Apartments"
+                ],
+                tips: [
+                    "Plan at least 4-5 hours for your visit",
+                    "Download the official Louvre app for guided tours",
+                    "Visit on Wednesday or Friday evenings for fewer crowds",
+                    "Book timed entry tickets online in advance"
+                ]
+            },
+            "notre-dame": {
+                title: "Notre Dame Cathedral",
+                image: "./resources/notre-dame.jpg",
+                price: "Free",
+                rating: "⭐⭐⭐⭐⭐ (4.9/5)",
+                visitors: "6M+",
+                description: "Notre-Dame de Paris, referred to simply as Notre-Dame, is a medieval Catholic cathedral on the Île de la Cité in Paris, France. The cathedral was consecrated to the Virgin Mary and considered to be one of the finest examples of French Gothic architecture.",
+                history: "Construction began in 1163 under Bishop Maurice de Sully and was largely completed by 1260. The cathedral has been modified several times in the following centuries. It was severely damaged in the 2019 fire but has been meticulously restored.",
+                highlights: [
+                    "Magnificent Gothic architecture",
+                    "Beautiful stained glass rose windows",
+                    "Reconstructed spire and roof structure",
+                    "Historic bells in the north tower",
+                    "Archaeological crypt museum"
+                ],
+                tips: [
+                    "Admission to the cathedral is free",
+                    "Tower visits require separate tickets",
+                    "Check current opening hours as restoration continues",
+                    "Attend a mass for the full spiritual experience"
+                ]
+            }
+        };
+
+        let currentModalId = null;
+        let userItinerary = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFilters();
+            initializeMap();
+            initializeCharts();
+            
+            // Restore itinerary UI when page loads
+            setTimeout(() => {
+                updateItineraryUI();
+            }, 500);
+        });
+
+        // Filter functionality
+        function initializeFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const attractionCards = document.querySelectorAll('.attraction-card');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const filter = button.dataset.filter;
+
+                    // Filter cards
+                    attractionCards.forEach(card => {
+                        if (filter === 'all' || card.dataset.category === filter) {
+                            card.style.display = 'block';
+                            anime({
+                                targets: card,
+                                opacity: [0, 1],
+                                translateY: [20, 0],
+                                duration: 500,
+                                easing: 'easeOutQuad'
+                            });
+                        } else {
+                            anime({
+                                targets: card,
+                                opacity: [1, 0],
+                                translateY: [0, -20],
+                                duration: 300,
+                                easing: 'easeInQuad',
+                                complete: () => {
+                                    card.style.display = 'none';
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        }
+
+        // Map initialization
+        function initializeMap() {
+            const map = L.map('map').setView([48.8566, 2.3522], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Attraction markers
+            const attractions = [
+                { name: 'Eiffel Tower', lat: 48.8584, lng: 2.2945, category: 'monuments' },
+                { name: 'Louvre Museum', lat: 48.8606, lng: 2.3376, category: 'museums' },
+                { name: 'Notre Dame', lat: 48.8530, lng: 2.3499, category: 'churches' },
+                { name: 'Arc de Triomphe', lat: 48.8738, lng: 2.2950, category: 'monuments' },
+                { name: 'Sacré-Cœur', lat: 48.8867, lng: 2.3431, category: 'churches' },
+                { name: 'Versailles', lat: 48.8049, lng: 2.1204, category: 'gardens' }
+            ];
+
+            attractions.forEach(attraction => {
+                const marker = L.marker([attraction.lat, attraction.lng]).addTo(map);
+                marker.bindPopup(`<b>${attraction.name}</b><br>Category: ${attraction.category}`);
+            });
+        }
+
+        // Charts initialization
+        function initializeCharts() {
+            // Attractions Chart
+            const attractionsChart = echarts.init(document.getElementById('attractions-chart'));
+            const attractionsOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['Louvre', 'Sacré-Cœur', 'Eiffel Tower', 'Versailles', 'Notre Dame', 'Arc de Triomphe']
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Visitors (Millions)'
+                },
+                series: [{
+                    name: 'Annual Visitors',
+                    data: [8.9, 11, 6.3, 8, 6, 1.7],
+                    type: 'bar',
+                    itemStyle: {
+                        color: '#4A90E2'
+                    }
+                }]
+            };
+            attractionsChart.setOption(attractionsOption);
+
+            // Timing Chart
+            const timingChart = echarts.init(document.getElementById('timing-chart'));
+            const timingOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['Crowds', 'Prices', 'Weather']
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: 'Crowds',
+                        type: 'line',
+                        data: [2, 2, 3, 4, 5, 8, 9, 9, 6, 5, 3, 3],
+                        itemStyle: { color: '#E8B4B8' }
+                    },
+                    {
+                        name: 'Prices',
+                        type: 'line',
+                        data: [3, 3, 4, 5, 6, 8, 9, 9, 7, 6, 4, 4],
+                        itemStyle: { color: '#9CAF88' }
+                    },
+                    {
+                        name: 'Weather',
+                        type: 'line',
+                        data: [2, 3, 5, 7, 8, 9, 9, 9, 8, 6, 4, 2],
+                        itemStyle: { color: '#4A90E2' }
+                    }
+                ]
+            };
+            timingChart.setOption(timingOption);
+
+            // Make charts responsive
+            window.addEventListener('resize', function() {
+                attractionsChart.resize();
+                timingChart.resize();
+            });
+        }
+
+        // Modal functionality
+        function openModal(attractionId) {
+            const attraction = attractionsData[attractionId];
+            if (!attraction) return;
+
+            currentModalId = attractionId;
+
+            // Update modal content
+            document.getElementById('modal-title').textContent = attraction.title;
+            document.getElementById('modal-image').src = attraction.image;
+            document.getElementById('modal-image').alt = attraction.title;
+            document.getElementById('modal-price').textContent = attraction.price;
+            document.getElementById('modal-rating').textContent = attraction.rating;
+            document.getElementById('modal-visitors').textContent = attraction.visitors;
+
+            // Create modal content
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-gray-800 mb-3">Description</h3>
+                        <p class="text-gray-600">${attraction.description}</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-gray-800 mb-3">History</h3>
+                        <p class="text-gray-600">${attraction.history}</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-gray-800 mb-3">Highlights</h3>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            ${attraction.highlights.map(highlight => `<li>${highlight}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-gray-800 mb-3">Visitor Tips</h3>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            ${attraction.tips.map(tip => `<li>${tip}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            // Show modal
+            document.getElementById('attraction-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Animate modal appearance
+            anime({
+                targets: '.modal-content',
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('attraction-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            currentModalId = null;
+        }
+
+        // Itinerary functionality with session management
+        function addToItinerary(attractionId) {
+            const sessionManager = window.parisApp?.getSessionManager();
+            
+            if (sessionManager) {
+                const added = sessionManager.addToItinerary(attractionId);
+                if (added) {
+                    showMessage(`Added to your itinerary!`, 'success');
+                    updateItineraryUI();
+                } else {
+                    showMessage(`Already in your itinerary!`, 'info');
+                }
+            } else {
+                // Fallback for older browsers
+                if (!userItinerary.includes(attractionId)) {
+                    userItinerary.push(attractionId);
+                    showMessage(`Added to your itinerary!`, 'success');
+                } else {
+                    showMessage(`Already in your itinerary!`, 'info');
+                }
+            }
+        }
+
+        function updateItineraryUI() {
+            const sessionManager = window.parisApp?.getSessionManager();
+            if (sessionManager) {
+                const itinerary = sessionManager.getItinerary();
+                
+                // Update heart icons to show filled state for items in itinerary
+                itinerary.forEach(itemId => {
+                    const button = document.querySelector(`[data-id="${itemId}"] button[onclick*="addToItinerary"] `);
+                    if (button) {
+                        button.innerHTML = '❤️ Added';
+                        button.classList.add('bg-green-500', 'hover:bg-green-600');
+                        button.classList.remove('bg-rose-500', 'hover:bg-rose-600');
+                    }
+                });
+            }
+        }
+
+        function addToItineraryFromModal() {
+            if (currentModalId) {
+                addToItinerary(currentModalId);
+            }
+        }
+
+        function bookTickets() {
+            showMessage(`Booking system coming soon! For now, please visit the official attraction website.`, 'info');
+        }
+
+        // Utility functions
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+            
+            messageDiv.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+            messageDiv.textContent = message;
+            
+            document.body.appendChild(messageDiv);
+            
+            anime({
+                targets: messageDiv,
+                translateX: [300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            setTimeout(() => {
+                anime({
+                    targets: messageDiv,
+                    translateX: [0, 300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => messageDiv.remove()
+                });
+            }, 4000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('attraction-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && currentModalId) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

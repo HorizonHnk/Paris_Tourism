@@ -1,0 +1,65 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User feedback and contact submissions
+    match /feedback/{feedbackId} {
+      // Anyone can create feedback
+      allow create: if true;
+      // Only authenticated users can read their own feedback
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      // No updates or deletes allowed
+      allow update, delete: if false;
+    }
+
+    // Contact form submissions
+    match /contacts/{contactId} {
+      // Anyone can create contact submissions
+      allow create: if true;
+      // No direct read access
+      allow read, update, delete: if false;
+    }
+
+    // User itineraries (saved by session)
+    match /itineraries/{sessionId} {
+      // Anyone can read and write their own itinerary (session-based)
+      allow read, write: if true;
+      // In production, add proper authentication
+    }
+
+    // Visit analytics (anonymous)
+    match /analytics/{analyticsId} {
+      // Anyone can create analytics data
+      allow create: if true;
+      // No read access
+      allow read, update, delete: if false;
+    }
+
+    // Public data - attractions information
+    match /attractions/{attractionId} {
+      // Anyone can read attraction information
+      allow read: if true;
+      // No write access for public
+      allow write: if false;
+    }
+
+    // Public data - events calendar
+    match /events/{eventId} {
+      // Anyone can read events
+      allow read: if true;
+      // No write access for public
+      allow write: if false;
+    }
+
+    // Newsletter subscriptions
+    match /newsletter/{email} {
+      // Anyone can subscribe
+      allow create: if true;
+      // Can update own subscription
+      allow update: if resource.data.email == request.auth.token.email;
+      // No read or delete for public
+      allow read, delete: if false;
+    }
+  }
+}
