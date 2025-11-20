@@ -9,7 +9,7 @@ A modern, interactive tourism website for Paris featuring AI-powered assistance,
 
 ## 🌐 Live Demo
 
-**Visit the live website:** [paris-tourism.netlify.app](https://paris-tourism.netlify.app/)
+**Visit the live website:** [https://paris-tourism-platform.netlify.app/](https://paris-tourism-platform.netlify.app/)
 
 ## ✨ Features
 
@@ -36,7 +36,7 @@ A modern, interactive tourism website for Paris featuring AI-powered assistance,
 ## 🚀 Quick Start
 
 ### Option 1: View Online
-Simply visit [paris-tourism.netlify.app](https://paris-tourism.netlify.app/) to see the live website.
+Simply visit [https://paris-tourism-platform.netlify.app/](https://paris-tourism-platform.netlify.app/) to see the live website.
 
 ### Option 2: Run Locally
 
@@ -362,7 +362,7 @@ Contributions are welcome! Here's how you can help:
 
 ### Repository Links
 - **GitHub:** [github.com/HorizonHnk/Paris_Tourism](https://github.com/HorizonHnk/Paris_Tourism)
-- **Live Site:** [paris-tourism.netlify.app](https://paris-tourism.netlify.app/)
+- **Live Site:** [https://paris-tourism-platform.netlify.app/](https://paris-tourism-platform.netlify.app/)
 - **Report Issues:** [GitHub Issues](https://github.com/HorizonHnk/Paris_Tourism/issues)
 
 ## ⭐ Show Your Support
